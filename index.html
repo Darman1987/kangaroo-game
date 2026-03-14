@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thunder Kangaroo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="titlebar glass">
+        <div class="logo">
+          <span class="logo-mark">TK</span>
+          <div class="logo-text">
+            <div class="logo-title">Thunder Kangaroo</div>
+            <div class="logo-subtitle">Endless Runner</div>
+          </div>
+        </div>
+        <div class="status">
+          <div class="status-chip" id="highScoreLabel">High Score: 0</div>
+          <div class="status-chip" id="scoreLabel">Score: 0</div>
+        </div>
+      </header>
+
+      <main class="game-shell">
+        <canvas id="game"></canvas>
+        <button class="pause-btn" id="pauseBtn" aria-label="Pause">II</button>
+        <div class="touch-controls">
+          <button class="touch-btn" id="leftBtn" aria-label="Move Left">◀</button>
+          <button class="touch-btn" id="rightBtn" aria-label="Move Right">▶</button>
+        </div>
+
+        <div class="overlay" id="menuScreen">
+          <div class="panel">
+            <h1>Thunder Kangaroo</h1>
+            <p>Swipe or use arrow keys to dodge obstacles and grab fruit.</p>
+            <div class="panel-actions">
+              <button class="primary" id="playBtn">Play</button>
+              <button id="instructionsBtn">Instructions</button>
+              <button id="exitBtn">Exit</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay hidden" id="instructionsScreen">
+          <div class="panel">
+            <h2>How To Play</h2>
+            <ul>
+              <li>Swipe left or right anywhere on the screen.</li>
+              <li>Use arrow keys, A/D, or the on-screen buttons.</li>
+              <li>Collect fruit for score boosts.</li>
+              <li>Grab a shield to survive one hit.</li>
+              <li>Avoid obstacles to keep running.</li>
+            </ul>
+            <div class="panel-actions">
+              <button class="primary" id="instructionsPlayBtn">Play</button>
+              <button id="backToMenuBtn">Main Menu</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay hidden" id="gameOverScreen">
+          <div class="panel">
+            <h2>Game Over</h2>
+            <p id="finalScoreLabel">Score: 0</p>
+            <p id="finalHighScoreLabel">High Score: 0</p>
+            <div class="panel-actions">
+              <button class="primary" id="retryBtn">Play Again</button>
+              <button id="menuBtn">Main Menu</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay hidden" id="pauseScreen">
+          <div class="panel">
+            <h2>Paused</h2>
+            <div class="panel-actions">
+              <button class="primary" id="resumeBtn">Resume</button>
+              <button id="pauseMenuBtn">Main Menu</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="hint glass">
+        Swipe or use arrow keys to move. Tap the pause button to pause. Grab the shield for protection.
+      </footer>
+    </div>
+    <script src="./game.js"></script>
+  </body>
+</html>

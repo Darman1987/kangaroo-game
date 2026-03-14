@@ -1,0 +1,256 @@
+:root {
+  color-scheme: light;
+  --ink: #0b0b0b;
+  --glass: rgba(255, 255, 255, 0.86);
+  --sun: #f1b24a;
+  --leaf: #2c6b4b;
+  --panel: #ffffff;
+  --shadow: 0 18px 40px rgba(10, 20, 25, 0.18);
+  --sand: #e9c28e;
+  --ink-soft: rgba(10, 15, 20, 0.7);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", "Gill Sans", "Trebuchet MS", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top, rgba(255, 246, 230, 0.9) 0%, rgba(214, 235, 226, 0.85) 40%, rgba(244, 198, 132, 0.9) 100%),
+    linear-gradient(160deg, #fef9f2 0%, #e6f1ea 50%, #f4c37a 100%);
+  display: grid;
+  place-items: stretch;
+}
+
+.page {
+  width: min(1400px, 96vw);
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: 16px 0;
+  margin: 0 auto;
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.titlebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.logo {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.logo-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(140deg, #ffcf6b, #f26a0c);
+  color: #1d1d1d;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.logo-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.logo-subtitle {
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-chip {
+  background: #fff9ee;
+  padding: 8px 14px;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  font-weight: 600;
+}
+
+.game-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #bfe9ff 0%, #8cc48f 45%, #5b6f46 100%);
+  box-shadow: var(--shadow);
+  border: 3px solid #121212;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pause-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.touch-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 18px;
+  pointer-events: none;
+}
+
+.touch-btn {
+  pointer-events: auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 2px solid #111;
+  background: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(2px);
+  background: rgba(6, 5, 4, 0.35);
+  z-index: 5;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.panel {
+  width: min(320px, 85%);
+  background: var(--panel);
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.panel h1,
+.panel h2 {
+  margin: 0 0 12px;
+}
+
+.panel p,
+.panel li {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.panel ul {
+  text-align: left;
+  padding-left: 20px;
+}
+
+.panel-actions {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+button {
+  font: inherit;
+  border-radius: 12px;
+  padding: 10px 16px;
+  border: 2px solid #111;
+  background: #fff7e7;
+  cursor: pointer;
+}
+
+button.primary {
+  background: linear-gradient(120deg, #ffe18b, #ff7d1f);
+  font-weight: 700;
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  padding: 10px 14px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 720px) {
+  .page {
+    width: 95vw;
+    padding: 12px 0;
+  }
+
+  .titlebar {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .status {
+    justify-content: center;
+  }
+}
+
+@media (orientation: landscape) {
+  .page {
+    width: min(1400px, 96vw);
+  }
+
+  .game-shell {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (orientation: portrait) {
+  .game-shell {
+    max-width: 520px;
+    justify-self: center;
+  }
+}
