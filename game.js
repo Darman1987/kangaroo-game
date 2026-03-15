@@ -7,6 +7,7 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const pauseScreen = document.getElementById("pauseScreen");
 const highScoreLabel = document.getElementById("highScoreLabel");
 const scoreLabel = document.getElementById("scoreLabel");
+const livesLabel = document.getElementById("livesLabel");
 const finalScoreLabel = document.getElementById("finalScoreLabel");
 const finalHighScoreLabel = document.getElementById("finalHighScoreLabel");
 const pauseBtn = document.getElementById("pauseBtn");
@@ -53,7 +54,8 @@ const state = {
   lastInputDir: 0,
   playerY: 0,
   lastFruitTime: 0,
-  shield: false,
+  lives: 1,
+  shieldActive: false,
   shieldPulse: 0,
   images: {},
   audio: null,
@@ -113,13 +115,19 @@ function updateScore(extra) {
   scoreLabel.textContent = `Score: ${state.score}`;
 }
 
+function updateLivesDisplay() {
+  const hearts = Array.from({ length: state.lives }, () => `<span class="heart">❤</span>`).join("");
+  livesLabel.innerHTML = hearts || "<span class=\"heart\">❤</span>";
+}
+
 function resetGame() {
   state.running = true;
   state.paused = false;
   state.score = 0;
   state.speed = 220;
   state.lane = 1;
-  state.shield = false;
+  state.lives = 1;
+  state.shieldActive = false;
   state.shieldPulse = 0;
   state.obstacles = [];
   state.pickups = [];
@@ -130,6 +138,7 @@ function resetGame() {
   state.laneSeeded = [false, false, false];
   updateScore(0);
   updateHighScore();
+  updateLivesDisplay();
   initAudio();
 }
 
@@ -251,18 +260,21 @@ function drawPlayer() {
   const key = currentKangarooKey();
   const img = state.images[key];
   const x = laneCenter(state.lane);
-  const scale = baseScale() * 0.48;
-  if (state.shield) {
+  const desiredWidth = ASSET_WIDTH * baseScale();
+  drawImageCentered(img, x, state.playerY, desiredWidth);
+
+  if (state.shieldActive && img) {
     const pulse = 0.5 + Math.sin(state.shieldPulse) * 0.2;
+    const imgScale = desiredWidth / img.width;
+    const imgHeight = img.height * imgScale;
+    const radius = Math.max(desiredWidth, imgHeight) / 2 + 5 + pulse * 6;
     ctx.save();
-    ctx.globalAlpha = 0.7;
     ctx.fillStyle = "rgba(86, 190, 255, 0.5)";
     ctx.beginPath();
-    ctx.arc(x, state.playerY, 60 * scale + pulse * 18, 0, Math.PI * 2);
+    ctx.arc(x, state.playerY, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
-  drawImageCentered(img, x, state.playerY, ASSET_WIDTH * baseScale());
 }
 
 function drawEntities() {
@@ -274,21 +286,51 @@ function drawEntities() {
   state.pickups.forEach((item) => {
     const x = laneCenter(item.lane);
     if (item.type === "shield") {
-      ctx.save();
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle = "rgba(92, 197, 255, 0.9)";
-      ctx.beginPath();
-      ctx.arc(x, item.y, (ASSET_WIDTH / 2) * baseScale(), 0, Math.PI * 2);
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.stroke();
-      ctx.restore();
+      drawShieldPickup(x, item.y, (ASSET_WIDTH / 2) * baseScale());
     } else {
       const img = state.images[item.type];
       drawImageCentered(img, x, item.y, ASSET_WIDTH * baseScale());
     }
   });
+}
+
+function drawShieldPickup(x, y, size) {
+  ctx.save();
+  const glow = ctx.createRadialGradient(x, y, size * 0.2, x, y, size * 1.2);
+  glow.addColorStop(0, "rgba(140, 220, 255, 0.9)");
+  glow.addColorStop(1, "rgba(140, 220, 255, 0)");
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y, size * 1.15, 0, Math.PI * 2);
+  ctx.fill();
+
+  const grad = ctx.createLinearGradient(x, y - size, x, y + size);
+  grad.addColorStop(0, "#e9f9ff");
+  grad.addColorStop(0.5, "#6bd2ff");
+  grad.addColorStop(1, "#2a7bd9");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size * 0.95);
+  ctx.bezierCurveTo(x + size * 0.7, y - size * 0.95, x + size * 0.95, y - size * 0.25, x + size * 0.65, y + size * 0.35);
+  ctx.lineTo(x, y + size * 0.95);
+  ctx.lineTo(x - size * 0.65, y + size * 0.35);
+  ctx.bezierCurveTo(x - size * 0.95, y - size * 0.25, x - size * 0.7, y - size * 0.95, x, y - size * 0.95);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = Math.max(2, size * 0.08);
+  ctx.stroke();
+
+  ctx.globalAlpha = 0.8;
+  ctx.strokeStyle = "rgba(255,255,255,0.6)";
+  ctx.lineWidth = Math.max(1, size * 0.04);
+  ctx.beginPath();
+  ctx.moveTo(x, y - size * 0.6);
+  ctx.lineTo(x, y + size * 0.55);
+  ctx.stroke();
+
+  ctx.restore();
 }
 
 function updateEntities(delta) {
@@ -312,13 +354,14 @@ function checkCollisions() {
     if (item.lane !== state.lane) continue;
     if (Math.abs(item.y - playerY) < 60) {
       if (item.type === "shield") {
-        state.shield = true;
+        state.lives += 1;
+        state.shieldActive = true;
         state.shieldPulse = 0;
-        playSound("shield");
+        playSound("energy");
+        updateLivesDisplay();
       } else {
-        const points = { banana: 25, apple: 30, grapes: 35 }[item.type] || 20;
-        updateScore(points);
-        playSound("pickup");
+        updateScore(1);
+        playSound("eat");
       }
       state.pickups.splice(i, 1);
     }
@@ -328,9 +371,11 @@ function checkCollisions() {
     if (obs.lane !== state.lane) continue;
     if (Math.abs(obs.y - playerY) < 70) {
       state.obstacles.splice(i, 1);
-      if (state.shield) {
-        state.shield = false;
+      if (state.lives > 1) {
+        state.lives -= 1;
+        state.shieldActive = state.lives > 1;
         playSound("hit");
+        updateLivesDisplay();
       } else {
         playSound("lose");
         endGame();
@@ -341,8 +386,7 @@ function checkCollisions() {
 
 function updateDifficulty(delta) {
   state.speed = Math.min(520, state.speed + delta * 6);
-  updateScore(delta * 3);
-  if (state.shield) state.shieldPulse += delta * 6;
+  if (state.shieldActive) state.shieldPulse += delta * 6;
 }
 
 function updateTimers(delta) {
@@ -369,7 +413,9 @@ function endGame() {
   finalScoreLabel.textContent = `Score: ${state.score}`;
   finalHighScoreLabel.textContent = `High Score: ${state.highScore}`;
   showScreen(gameOverScreen);
-  stopAudio();
+  setTimeout(() => {
+    if (!state.running) stopAudio();
+  }, 450);
 }
 
 function gameLoop(timestamp) {
@@ -460,83 +506,60 @@ function baseScale() {
 
 function initAudio() {
   if (state.audioReady) return;
-  const context = new (window.AudioContext || window.webkitAudioContext)();
-  const master = context.createGain();
-  master.gain.value = 0.22;
-  master.connect(context.destination);
+  const background = new Audio("assets/audio/background.mp3");
+  background.loop = true;
+  background.volume = 0.35;
 
-  const filter = context.createBiquadFilter();
-  filter.type = "lowpass";
-  filter.frequency.value = 900;
-  filter.Q.value = 0.6;
-  filter.connect(master);
+  const eat = new Audio("assets/audio/eating.mp3");
+  eat.volume = 0.6;
 
-  const music = context.createOscillator();
-  const musicGain = context.createGain();
-  music.type = "sine";
-  music.frequency.value = 174;
-  musicGain.gain.value = 0.06;
-  music.connect(musicGain).connect(filter);
-  music.start();
+  const energy = new Audio("assets/audio/energy.mp3");
+  energy.volume = 0.65;
 
-  const pad = context.createOscillator();
-  const padGain = context.createGain();
-  pad.type = "triangle";
-  pad.frequency.value = 261;
-  padGain.gain.value = 0.04;
-  pad.connect(padGain).connect(filter);
-  pad.start();
+  const lose = new Audio("assets/audio/losing.mp3");
+  lose.volume = 0.7;
 
-  const lfo = context.createOscillator();
-  const lfoGain = context.createGain();
-  lfo.type = "sine";
-  lfo.frequency.value = 0.12;
-  lfoGain.gain.value = 60;
-  lfo.connect(lfoGain).connect(filter.frequency);
-  lfo.start();
+  const hit = new Audio("assets/audio/losing.mp3");
+  hit.volume = 0.35;
 
-  state.audio = { context, master, music, pad, lfo };
+  state.audio = {
+    background,
+    effects: {
+      eat,
+      energy,
+      lose,
+      hit,
+    },
+  };
   state.audioReady = true;
+  background.play().catch(() => {
+    // Autoplay can be blocked until a user gesture; ignore.
+  });
 }
 
 function stopAudio() {
   if (!state.audioReady || !state.audio) return;
-  const { context, music, pad, lfo, master } = state.audio;
-  try {
-    music.stop();
-    pad.stop();
-    lfo.stop();
-  } catch {
-    // ignore if already stopped
-  }
-  try {
-    master.disconnect();
-  } catch {
-    // ignore
-  }
-  try {
-    context.close();
-  } catch {
-    // ignore
-  }
+  const { background, effects } = state.audio;
+  background.pause();
+  background.currentTime = 0;
+  Object.values(effects).forEach((effect) => {
+    effect.pause();
+    effect.currentTime = 0;
+  });
   state.audioReady = false;
   state.audio = null;
 }
 
 function playSound(type) {
   if (!state.audioReady) return;
-  const { context, master } = state.audio;
-  const osc = context.createOscillator();
-  const gain = context.createGain();
-  const now = context.currentTime;
-  const freqMap = { pickup: 720, shield: 540, hit: 280, lose: 160 };
-  osc.type = "square";
-  osc.frequency.value = freqMap[type] || 440;
-  gain.gain.setValueAtTime(0.35, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-  osc.connect(gain).connect(master);
-  osc.start(now);
-  osc.stop(now + 0.28);
+  const effect = state.audio.effects[type];
+  if (!effect) return;
+  try {
+    effect.currentTime = 0;
+    effect.play();
+  } catch {
+    // ignore play errors
+  }
 }
 
 function togglePause() {
@@ -552,8 +575,8 @@ function togglePause() {
 window.addEventListener("resize", resize);
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") moveLane(-1);
-  if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") moveLane(1);
+  if (event.key === "ArrowLeft") moveLane(-1);
+  if (event.key === "ArrowRight") moveLane(1);
   if (event.key.toLowerCase() === "p" || event.key === "Escape") togglePause();
 });
 
@@ -621,5 +644,6 @@ exitBtn.addEventListener("click", () => {
 loadImages().then(() => {
   resize();
   updateHighScore();
+  updateLivesDisplay();
   requestAnimationFrame(gameLoop);
 });
