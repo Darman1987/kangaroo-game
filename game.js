@@ -585,17 +585,57 @@ window.addEventListener("keydown", (event) => {
 });
 
 let touchStartX = null;
-canvas.addEventListener("pointerdown", (event) => {
-  touchStartX = event.clientX;
-});
-canvas.addEventListener("pointerup", (event) => {
+
+function handleSwipeStart(x) {
+  touchStartX = x;
+}
+
+function handleSwipeEnd(x) {
   if (touchStartX === null) return;
-  const deltaX = event.clientX - touchStartX;
+  const deltaX = x - touchStartX;
   if (Math.abs(deltaX) > 30) {
     moveLane(deltaX > 0 ? 1 : -1);
   }
   touchStartX = null;
+}
+
+canvas.style.touchAction = "none";
+
+canvas.addEventListener("pointerdown", (event) => {
+  handleSwipeStart(event.clientX);
 });
+canvas.addEventListener("pointerup", (event) => {
+  handleSwipeEnd(event.clientX);
+});
+canvas.addEventListener("pointercancel", () => {
+  touchStartX = null;
+});
+
+canvas.addEventListener(
+  "touchstart",
+  (event) => {
+    if (event.touches.length === 0) return;
+    handleSwipeStart(event.touches[0].clientX);
+    event.preventDefault();
+  },
+  { passive: false }
+);
+canvas.addEventListener(
+  "touchend",
+  (event) => {
+    if (event.changedTouches.length === 0) return;
+    handleSwipeEnd(event.changedTouches[0].clientX);
+    event.preventDefault();
+  },
+  { passive: false }
+);
+canvas.addEventListener(
+  "touchcancel",
+  () => {
+    touchStartX = null;
+  },
+  { passive: true }
+);
 
 pauseBtn.addEventListener("click", togglePause);
 leftBtn.addEventListener("pointerdown", () => moveLane(-1));
