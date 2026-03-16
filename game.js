@@ -65,6 +65,7 @@ const state = {
 
 const ASSET_WIDTH = 175;
 const MIN_GAP = 1500;
+const MAX_LIVES = 5;
 
 function loadImages() {
   const entries = Object.entries(ASSETS);
@@ -116,8 +117,11 @@ function updateScore(extra) {
 }
 
 function updateLivesDisplay() {
-  const hearts = Array.from({ length: state.lives }, () => `<span class="heart">❤</span>`).join("");
-  livesLabel.innerHTML = hearts || "<span class=\"heart\">❤</span>";
+  const filled = Math.min(state.lives, MAX_LIVES);
+  const empty = Math.max(0, MAX_LIVES - filled);
+  const filledHearts = Array.from({ length: filled }, () => `<span class="heart">❤</span>`).join("");
+  const emptyHearts = Array.from({ length: empty }, () => `<span class="heart empty">❤</span>`).join("");
+  livesLabel.innerHTML = `${filledHearts}${emptyHearts}`;
 }
 
 function resetGame() {
@@ -354,7 +358,7 @@ function checkCollisions() {
     if (item.lane !== state.lane) continue;
     if (Math.abs(item.y - playerY) < 60) {
       if (item.type === "shield") {
-        state.lives += 1;
+        state.lives = Math.min(MAX_LIVES, state.lives + 1);
         state.shieldActive = true;
         state.shieldPulse = 0;
         playSound("energy");

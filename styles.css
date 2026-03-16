@@ -111,6 +111,11 @@ body {
   text-shadow: 0 2px 6px rgba(227, 59, 59, 0.35);
 }
 
+.lives .heart.empty {
+  color: #c9b4b4;
+  text-shadow: none;
+}
+
 .game-shell {
   position: relative;
   width: 100%;

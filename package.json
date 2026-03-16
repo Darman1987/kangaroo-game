@@ -1,0 +1,25 @@
+{
+  "name": "kangaroo-game",
+  "version": "1.0.0",
+  "description": "Endless runner built with vanilla JavaScript and Canvas.",
+  "main": "game.js",
+  "homepage": "https://github.com/Darman1987/kangaroo-game",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Darman1987/kangaroo-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Darman1987/kangaroo-game/issues"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}
