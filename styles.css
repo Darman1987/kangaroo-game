@@ -96,6 +96,7 @@ body {
   border-radius: 999px;
   box-shadow: var(--shadow);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .lives {
@@ -103,12 +104,18 @@ body {
   align-items: center;
   gap: 6px;
   background: #fff1f1;
+  min-width: 84px;
+  justify-content: center;
+  line-height: 1;
 }
 
 .lives .heart {
   color: #e33b3b;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-shadow: 0 2px 6px rgba(227, 59, 59, 0.35);
+  display: inline-block;
+  width: 16px;
+  text-align: center;
 }
 
 .lives .heart.empty {
@@ -252,6 +259,13 @@ button.primary {
 
   .status {
     justify-content: center;
+  }
+
+  .game-shell {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    aspect-ratio: 9 / 16;
   }
 }
 
