@@ -6,7 +6,7 @@ Endless runner built with vanilla JavaScript and Canvas.
 - Three-lane dodge and pickup gameplay
 - Fruit pickups for score (1 point each)
 - Shields add an extra life and show a blue protective layer
-- Lives shown as hearts (max 5)
+- Lives shown as hearts (max 3)
 - Background desert ambience plus pickup/lose sound effects
 - Touch controls and keyboard arrow keys
 

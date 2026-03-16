@@ -65,7 +65,7 @@ const state = {
 
 const ASSET_WIDTH = 175;
 const MIN_GAP = 1500;
-const MAX_LIVES = 5;
+const MAX_LIVES = 3;
 
 function loadImages() {
   const entries = Object.entries(ASSETS);
